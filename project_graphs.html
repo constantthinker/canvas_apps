@@ -1,0 +1,538 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<style>
+input[type="button"] {
+	display: inline;
+	margin: 10px 20px;
+	padding: 10px; border:solid red;
+}
+input[type="checkbox"] {
+	width:20px;
+	height:20px;
+	padding: 0px;
+	float:left;
+}
+input[type="submit"]:hover, input[type="submit"]:active {
+	cursor: pointer;
+	background: white;
+}
+input[type="button"]:active {
+	background: rgb(148, 81, 41);
+	-moz-box-shadow: 0 0 .5em rgba(255, 242, 207, 1) inset;
+	-webkit-box-shadow: 0 0 .5em rgba(255, 242, 207, 1) inset;
+	box-shadow: 0 0 .5em rgba(255, 242, 207, 1) inset;
+}
+input {
+	border: 2px solid black; padding:5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	background: #fff;
+}
+select {
+	padding: 0;
+	margin-bottom: 2.5em;
+	position: relative;
+	top: .7em;
+}
+
+
+input:focus {
+	border: 2px solid #000d30;
+	outline: none;
+}
+html, body {
+	margin: 0px;
+	padding: 0px;
+
+	height: 100%;
+	min-width: 1200px;
+
+}
+ #canvas-container {
+   width: 30%;
+   text-align:right; background:red; float:right;
+}
+#dataTable{
+	margin:0 auto;
+	
+	}
+	.main_frame{
+		background:red; 
+		width:100%; margin:10px 0 0 0;
+		}
+</style>
+</head>
+<body>
+
+
+<div class="main_frame">
+
+<div style=" width:33.3333333%;  float:left;">
+<canvas id="columnChart" width="380" height="380" style=" border:solid black; margin:0 0 0 20px;"></canvas>
+</div>
+<div style=" width:33.3333333%;  float:left;">
+
+<canvas id="piechart" width="380" height="380" style=" border:solid black; float:right; "></canvas>
+</div>
+<div style=" width:33.3333333%;  float:left; text-align: center;">
+<form action="script.php" method="post">
+<table id="dataTable"  border="1" class="width_price" >
+  <tr>
+
+    <td  ><input  type="checkbox" name="chk" /></td>
+    <td><input type="text" name="numbers[]" placeholder="Ertek 1" id="Ertek 1" /></td>
+    </tr><tr>
+    <td  ><input  type="checkbox" name="chk" /></td>
+    <td><input type="text" name="numbers[]" placeholder="Ertek 2" id="Ertek 2" /></td>
+    </tr><tr>
+    <td  ><input  type="checkbox" name="chk" /></td>
+    <td><input type="text" name="numbers[]" placeholder="Ertek 3" id="Ertek 3" /></td>
+    </tr><tr>
+    <td  ><input  type="checkbox" name="chk" /></td>
+    <td><input type="text" name="numbers[]" placeholder="Ertek 4" id="Ertek 4" /></td>
+  
+   
+   
+  
+  </tr>
+  </table>
+<input type="button" value="Sor hozzad" onClick="addRow('dataTable')" />
+  <input type="button" value="Kivalasztott sor torol" onClick="deleteRow('dataTable')" /></br>
+<input type="button" value="Kirajzol" id="btntest" />
+
+  </form>
+
+
+      
+    
+</div>
+   </div>
+<script>
+/*INPUT adat validacio es bevitel*/
+
+function validateEmpty(fld, selnumbersox) {
+
+    if (isNaN(parseFloat(fld.value))) {
+        fld.style.background = 'Red';
+        alert("Nem szamot (NaN) adtal meg, csak SZAMOKAT vizualizalhatunk!")
+            fld.focus();
+        return false;
+    } else {
+        fld.style.background = 'White';
+        /*selnumbersox.push(inpfields[i].value);*/
+        return true;
+    }
+
+}
+function getSelectedChbox(frm) {
+
+    var selnumbersox = [];
+
+    var inpfields = frm.getElementsByTagName('input');
+    var nr_inpfields = inpfields.length;
+
+    for (var i = 0; i < nr_inpfields; i++) {
+
+        if (inpfields[i].type == "text") {
+
+            if (validateEmpty(inpfields[i], selnumbersox) == true) {
+
+                selnumbersox.push(parseFloat(inpfields[i].value));
+
+            }
+        }
+    }
+
+    return selnumbersox;
+}
+
+document.getElementById('btntest').onclick = function() {
+
+    var data = getSelectedChbox(this.form);
+
+    drawAllgraph(data);
+
+}
+//-->
+
+////////////////////////////////////////////////////
+function drawAllgraph(data) {
+    var canvas = document.getElementById("piechart");
+    var context = canvas.getContext("2d");
+    context.clearRect(0, 0, 500, 500);
+
+    var canvas = document.getElementById("columnChart");
+    var context = canvas.getContext("2d");
+    context.clearRect(0, 0, 500, 500)
+
+        var labels = new Array();
+    for (var i = 0; i < data.length; i++) {
+        labels.push(data[i]);
+    }
+
+    function include(arr, obj) {
+        /* ellenorzes h letezik e a tomben az adott ertek*/
+        for (var i = 0; i < arr.length; i++) {
+            if (arr[i] == obj)
+                return true;
+        }
+    }
+
+    function get_random_colors_for_data(data) {
+
+        var colors = new Array();
+        for (var i = 0; i < data.length; i++) {
+            var color = get_random_color();
+            if (!include(colors, color)) {
+                colors.push(color);
+            }
+
+        }
+        return colors;
+    }
+
+    var colors = get_random_colors_for_data(data);
+    alert(colors);
+
+    function get_random_color() {
+        var letters = '0123456789ABCDEF'.split('');
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.round(Math.random() * 15)];
+        }
+        return color;
+    }
+    get_random_color();
+    function sumArray(array) {
+        var total = 0;
+        for (var i in array) {
+
+            total += array[i];
+
+        }
+        return total;
+    }
+    function ArraytoPercentigePie(data) {
+        var dataConverted = new Array();
+        for (var i = 0; i < data.length; i++) {
+
+            elem = ((data[i] / sumArray(data)) * 360);
+
+            dataConverted.push(elem);
+
+        }
+
+        return (dataConverted);
+    }
+
+    data = ArraytoPercentigePie(data);
+
+    var strokes = "#000000";
+    // black
+    canvas = document.getElementById("piechart");
+    var context = canvas.getContext("2d");
+
+    for (var i = 0; i < data.length; i++) {
+
+        drawSegment(canvas, context, i);
+
+    }
+    writeLabel("Graph 2", canvas, context);
+
+    function drawSegment(canvas, context, i) {
+        context.save();
+
+        var centerX = Math.floor(canvas.width / 2);
+
+        var centerY = Math.floor(canvas.height / 2);
+        radius = (Math.floor(canvas.width / 3));
+
+        var startingAngle = degreesToRadians(sumTo(data, i));
+
+        var arcSize = degreesToRadians(data[i]);
+        var endingAngle = startingAngle + arcSize;
+
+        context.beginPath();
+        context.moveTo(centerX, centerY);
+        context.arc(centerX, centerY, radius, startingAngle, endingAngle, false);
+        /*context.shadowOffsetX = 2;
+    context.shadowOffsetY = 2;
+    context.shadowBlur = 2;
+	context.shadowColor = "#999";*/
+        context.closePath();
+        context.fillStyle = colors[i];
+
+        context.fill();
+        context.stroke();
+        context.closePath();
+        context.restore();
+
+        drawSegmentLabelPie(canvas, context, i);
+    }
+    function degreesToRadians(degrees) {
+        return (degrees * Math.PI) / 180;
+    }
+    function sumTo(a, i) {
+        var sum = 0;
+        for (var j = 0; j < i; j++) {
+            sum += a[j];
+        }
+        return sum;
+    }
+
+    function drawSegmentLabelPie(canvas, context, i) {
+        context.save();
+        var x = Math.floor(canvas.width / 2);
+        var y = Math.floor(canvas.height / 2);
+        var angle = degreesToRadians(sumTo(data, i));
+
+        context.translate(x, y);
+        context.rotate(angle);
+        var dx = Math.floor(canvas.width * 0.5) - (canvas.width / 10);
+        var dy = Math.floor(canvas.height * 0.05);
+
+        context.textAlign = "center";
+        context.fillStyle = colors[i];
+        var fontSize = Math.floor(canvas.height / 30);
+
+        context.font = fontSize + "pt Helvetica";
+
+        context.fillText(labels[i], dx, dy);
+
+        context.restore();
+    }
+    function writeLabel(label, canvas, context) {
+        var x = canvas.width / 2;
+        var y = canvas.height / 2;
+        context.textAlign = 'center';
+        var fontSize = Math.floor(canvas.height / 30);
+		context.fillStyle = 'black';
+        context.font = fontSize + "pt Helvetica";
+        context.fillText(label, x, 30);
+
+    }
+
+    function drawColumnsLabel(x_position, startPoint_y, label, context) {
+
+        var fontSize = Math.floor(canvas.height / 30);
+        context.font = fontSize + "pt Helvetica";
+        context.fillText(label, x_position, startPoint_y);
+
+    }
+    function drawColumn(labels) {
+
+        var canvas = document.getElementById('columnChart');
+        var context = canvas.getContext("2d");
+        
+        context.beginPath();
+        var startPoint_x = (canvas.width / 6);
+
+        var startPointheight = (canvas.height / 6);
+        var startPoint_y = (canvas.width / (1.2));
+        var endPointheight1 = (canvas.height / (1.2));
+
+        context.moveTo(startPoint_x, startPointheight);
+        context.lineTo(startPointheight, startPoint_y);
+        context.lineTo(startPoint_y, endPointheight1);
+
+        var lines = endPointheight1 - startPoint_x;
+
+        /* vonal teljes hosz : 266,6666666666666*/
+        /*															*/
+
+        /* 20 13,33333333333333*/
+        /* 80 53,33333333333332*/
+
+        context.stroke();
+        /* context.fillStyle="#FF0000";
+ context.shadowOffsetX = 2;
+    context.shadowOffsetY = 2;
+    context.shadowBlur = 2;
+	context.shadowColor = "#999";*/
+        /*szamitas: 266,6666666666666=100% magassag 
+
+(oszlopok ossz magassaga/oszloponkent[i])*266,6666666666666
+
+*/
+        var columnsHeight = (columnsHeightToPercentige(lines, data));
+
+        var columnsWidth = columnsWidthToPercentige(lines, data);
+        /*oszlopok vastagsaga aszerint hany oszlopot akarunk kirajzolni*/
+
+        var emptyWidth = Aid_to_positioningEmptySector(lines, data);
+        /*oszlopok "padding" -je vastagsaga a szerint hany oszlopot vagyis erteket akarunk kirajzolni*/
+        var Aid_position_Column = Aid_to_positioningColumn(lines, data);
+        /*var positionEmptySectors=positioningEmptySector(lines,data);*/
+        /* alert(columnsWidth);
+	 alert(startPoint_x);
+	  alert(startPoint_y);
+	 alert (emptyWidth);
+	 alert (Aid_position_Column);*/
+        /*az oszlopok rajzolasa (x tengelyen elhelyezkedes, y tengelyen elhelyezkedes(mindig allando),oszlop szelesseg,oszlop magassaga 100% szazalekhoz viszonyitva */
+
+        context.strokeStyle = "#000000";
+
+        for (var i = 0; i < data.length; i++) {
+            /* kiolvassuk az adatokat a tombokbol amiket csinaltunk es megrajzoljuk az oszlopokat*/
+            context.fillStyle = colors[i];
+            context.fillRect(startPoint_x + emptyWidth[i] + Aid_position_Column[i], startPoint_y, columnsWidth[i], columnsHeight[i]);
+            context.strokeRect(startPoint_x + emptyWidth[i] + Aid_position_Column[i], startPoint_y, columnsWidth[i], columnsHeight[i]);
+            drawColumnsLabel(startPoint_x + emptyWidth[i] + Aid_position_Column[i] + columnsWidth[i] / 2, 350, labels[i], context);
+            /*alert (data.length);*/
+
+            /*dataConverted.push(elem);*/
+
+            }
+writeLabel("Graph 1", canvas, context);
+        /*
+
+
+*/
+        /*
+ context.fillRect(67+10,331,42,-100);
+
+  context.fillRect(134+10,331,42,-200);
+   context.fillRect(201+10,331,42,-50);
+    context.fillRect(268+10,331,42,1);
+    */
+
+        }
+
+    function columnsHeightToPercentige(lines, data) {
+
+        var dataConverted = new Array();
+        for (var i = 0; i < data.length; i++) {
+
+            elem = ((data[i] / sumArray(data)) * lines);
+
+            dataConverted.push( - elem);
+
+        }
+
+        return (dataConverted);
+
+    }
+    function columnsWidthToPercentige(lines, data) {
+        var ColumnsWidth = lines * 0.8;
+        /* 80%-a grafikonnak olszop a 100%(max szelesseghez)-hez viszonyitva*/
+        var dataConverted = new Array();
+        elem = (ColumnsWidth / data.length);
+        /*alert(elem);*/
+        for (var i = 1; i < data.length + 1; i++) {
+
+            dataConverted.push(elem);
+
+            /*dataConverted.push(elem);*/
+
+            }
+
+        return (dataConverted);
+
+    }
+
+    function sectorsWidthToPercentige(lines, data) {
+        var ColumnsWidth = lines * 0.2;
+        /* 20%-a grafikonnak "ures" olszop a 100%(max szelesseghez)-hez viszonyitva*/
+
+        var dataConverted = new Array();
+        elem = (ColumnsWidth / (data.length + 1));
+
+        /*alert(elem);*/
+        for (var i = 0; i < data.length; i++) {
+
+            dataConverted.push(elem);
+
+            /*dataConverted.push(elem);*/
+
+            }
+
+        return (dataConverted);
+
+    }
+    function Aid_to_positioningEmptySector(lines, data) {
+        var dataConverted = new Array();
+        var sectors = sectorsWidthToPercentige(lines, data);
+
+        for (var i = 1; i < data.length + 1; i++) {
+
+            j = i - 1;
+
+            var sector = (i) * sectors[j];
+            dataConverted.push(sector);
+
+        }
+        return (dataConverted);
+
+    }
+    function Aid_to_positioningColumn(lines, data) {
+        var dataConverted = new Array();
+        var sectors = columnsWidthToPercentige(lines, data);
+
+        for (var i = 0; i < data.length; i++) {
+
+            var sector = (i) * sectors[i];
+            dataConverted.push(sector);
+
+        }
+        return (dataConverted);
+
+    }
+    drawColumn(labels);
+    context.beginPath();
+}
+function addRow(tableID) {
+
+    var table = document.getElementById(tableID);
+
+    var rowCount = table.rows.length;
+    var row = table.insertRow(rowCount);
+
+    var colCount = table.rows[0].cells.length;
+
+    for (var i = 0; i < colCount; i++) {
+
+        var newcell = row.insertCell(i);
+
+        newcell.innerHTML = table.rows[0].cells[i].innerHTML;
+        //alert(newcell.childNodes);
+        newcell.childNodes[0].placeholder = "Ertek " + (rowCount + 1);
+        newcell.childNodes[0].name = "numbers[] " + (rowCount + 1);
+        newcell.childNodes[0].id = "Ertek " + (rowCount + 1);
+        switch (newcell.childNodes[0].type) {
+        case "text":
+            newcell.childNodes[0].value = "";
+            break;
+        case "checkbox":
+            newcell.childNodes[0].checked = false;
+            break;
+        case "select-one":
+            newcell.childNodes[0].selectedIndex = 0;
+            break;
+        }
+    }
+}
+
+function deleteRow(tableID) {
+    try {
+        var table = document.getElementById(tableID);
+        var rowCount = table.rows.length;
+        for (var i = 0; i < rowCount; i++) {
+            var row = table.rows[i];
+            var chkbox = row.cells[0].childNodes[0];
+            if (null != chkbox && true == chkbox.checked) {
+                table.deleteRow(i);
+                rowCount--;
+                i--;
+            }
+
+        }
+    } catch(e) {
+        alert(e);
+    }
+}
+</script>
+ 
+</body>
+</html>
