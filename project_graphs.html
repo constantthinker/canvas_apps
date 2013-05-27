@@ -101,7 +101,8 @@ html, body {
 <input type="button" value="Sor hozzad" onClick="addRow('dataTable')" />
   <input type="button" value="Kivalasztott sor torol" onClick="deleteRow('dataTable')" /></br>
 <input type="button" value="Kirajzol" id="btntest" />
-
+<div id="messages_error" style=" width:80%; background:red; margin:0 auto;"></div>
+<div id="messages_success" style=" width:80%; background:red; margin:0 auto;"></div>
   </form>
 
 
@@ -112,20 +113,43 @@ html, body {
 <script>
 /*INPUT adat validacio es bevitel*/
 
-function validateEmpty(fld, selnumbersox) {
-
+function validateEmpty(fld, selnumbersox, error) {
+	
     if (isNaN(parseFloat(fld.value))) {
-        fld.style.background = 'Red';
-        alert("Nem szamot (NaN) adtal meg, csak SZAMOKAT vizualizalhatunk!")
-            fld.focus();
-        return false;
+	error++;
+     
+        return error;
     } else {
-        fld.style.background = 'White';
-        /*selnumbersox.push(inpfields[i].value);*/
-        return true;
+	
+		
+        return error;
     }
 
 }
+function messages_success(fld){
+	var messages_success=document.getElementById("messages_success");
+	
+
+		document.getElementById("messages_success").style.color="#ffffff";
+		messages_success.innerHTML="A muvelet vegrahajtodott a szamok szerint !";
+		messages_success.style.background='Green'
+	
+        fld.style.background = 'White';
+ 
+	}
+	
+	function messages_error(fld){
+var messages_error=document.getElementById("messages_error");
+        fld.style.background = 'Red';
+      
+            fld.focus();
+		
+				
+		
+   messages_error.innerHTML="Nem szamot (NaN) adtal meg, csak SZAMOKAT vizualizalhatunk!";
+   messages_error.style.background='Red'
+       
+    }
 function getSelectedChbox(frm) {
 
     var selnumbersox = [];
@@ -136,12 +160,16 @@ function getSelectedChbox(frm) {
     for (var i = 0; i < nr_inpfields; i++) {
 
         if (inpfields[i].type == "text") {
+var error = "";
+            if (validateEmpty(inpfields[i], selnumbersox,error) != "") {
 
-            if (validateEmpty(inpfields[i], selnumbersox) == true) {
-
-                selnumbersox.push(parseFloat(inpfields[i].value));
-
-            }
+               
+messages_error(inpfields[i]);
+            }else{
+				  selnumbersox.push(parseFloat(inpfields[i].value));
+messages_success(inpfields[i]);
+				
+				}
         }
     }
 
@@ -149,9 +177,11 @@ function getSelectedChbox(frm) {
 }
 
 document.getElementById('btntest').onclick = function() {
-
+	var messages_error=document.getElementById("messages_error");
+	messages_error.innerHTML="";
+   messages_error.style.background='';
     var data = getSelectedChbox(this.form);
-
+console.log(data);
     drawAllgraph(data);
 
 }
@@ -339,7 +369,7 @@ function drawAllgraph(data) {
 
         var lines = endPointheight1 - startPoint_x;
 
-        /* vonal teljes hosz(canvas x,canvas y)=(400px,400px) : 266,6666666666666*/
+        /* vonal teljes hosz : 266,6666666666666*/
         /*															*/
 
         /* 20 13,33333333333333*/
@@ -351,7 +381,7 @@ function drawAllgraph(data) {
     context.shadowOffsetY = 2;
     context.shadowBlur = 2;
 	context.shadowColor = "#999";*/
-        /*szamitas: 266,6666666666666=100% magassag at (canvas x,canvas y)=(400px,400px)
+        /*szamitas: 266,6666666666666=100% magassag 
 
 (oszlopok ossz magassaga/oszloponkent[i])*266,6666666666666
 
@@ -500,16 +530,16 @@ function addRow(tableID) {
         newcell.childNodes[0].placeholder = "Ertek " + (rowCount + 1);
         newcell.childNodes[0].name = "numbers[] " + (rowCount + 1);
         newcell.childNodes[0].id = "Ertek " + (rowCount + 1);
+		
         switch (newcell.childNodes[0].type) {
+			
         case "text":
             newcell.childNodes[0].value = "";
             break;
         case "checkbox":
             newcell.childNodes[0].checked = false;
             break;
-        case "select-one":
-            newcell.childNodes[0].selectedIndex = 0;
-            break;
+   
         }
     }
 }
@@ -517,17 +547,37 @@ function addRow(tableID) {
 function deleteRow(tableID) {
     try {
         var table = document.getElementById(tableID);
+		
         var rowCount = table.rows.length;
+		
         for (var i = 0; i < rowCount; i++) {
             var row = table.rows[i];
             var chkbox = row.cells[0].childNodes[0];
             if (null != chkbox && true == chkbox.checked) {
+					
+	
+							  if(rowCount <= 1 ) {
+           alert( "You cannot delete more row(s) !" );
+       
+	
+	
+		
+            }else{
+				
                 table.deleteRow(i);
+			
                 rowCount--;
                 i--;
+					
+		
             }
-
+			}
+			 if (i!=-1){
+			table.rows[i].cells[1].childNodes[0].placeholder = "Ertek " + (i+1);
+					 console.log(table.rows[i].cells[1].childNodes[0].placeholder = "Ertek " + (i+1));
+			 }
         }
+			
     } catch(e) {
         alert(e);
     }
