@@ -138,23 +138,26 @@ function messages_success(fld){
  
 	}
 	
-	function messages_error(fld){
+	function messages_error(fld,message,color){
 var messages_error=document.getElementById("messages_error");
-        fld.style.background = 'Red';
+        fld.style.background = color;
       
             fld.focus();
 		
 				
 		
-   messages_error.innerHTML="Nem szamot (NaN) adtal meg, csak SZAMOKAT vizualizalhatunk!";
+   messages_error.innerHTML=message;
    messages_error.style.background='Red'
        
     }
 function getSelectedChbox(frm) {
+ var table = document.getElementById("dataTable");
 
+	messages_error(table.rows[0].cells[1],"", 'White');
     var selnumbersox = [];
 
     var inpfields = frm.getElementsByTagName('input');
+	
     var nr_inpfields = inpfields.length;
 
     for (var i = 0; i < nr_inpfields; i++) {
@@ -164,7 +167,7 @@ var error = "";
             if (validateEmpty(inpfields[i], selnumbersox,error) != "") {
 
                
-messages_error(inpfields[i]);
+messages_error(inpfields[i],"Nem szamot (NaN) adtal meg, csak SZAMOKAT vizualizalhatunk!",'Red');
             }else{
 				  selnumbersox.push(parseFloat(inpfields[i].value));
 messages_success(inpfields[i]);
@@ -177,9 +180,14 @@ messages_success(inpfields[i]);
 }
 
 document.getElementById('btntest').onclick = function() {
+	
+	
+	
+	
 	var messages_error=document.getElementById("messages_error");
 	messages_error.innerHTML="";
    messages_error.style.background='';
+   
     var data = getSelectedChbox(this.form);
 console.log(data);
     drawAllgraph(data);
@@ -546,6 +554,11 @@ function addRow(tableID) {
 
 function deleteRow(tableID) {
     try {
+		
+      
+      
+          
+		
         var table = document.getElementById(tableID);
 		
         var rowCount = table.rows.length;
@@ -557,7 +570,7 @@ function deleteRow(tableID) {
 					
 	
 							  if(rowCount <= 1 ) {
-           alert( "You cannot delete more row(s) !" );
+        messages_error(table.rows[i].cells[1],"Nem lehet tobb sort totorlni", 'Red');
        
 	
 	
